@@ -1,22 +1,81 @@
 plugins {
-    id 'groovy'
-    id 'java'
+    id 'groovy' // tasks to compile groovy code
+    id 'java'   // tasks to compile java code
+    id 'java-gradle-plugin' // provodie implementation(gradleApi()) to use org.gradle.api pacakge
+    id 'maven-publish'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group 'com.mz.plugin'
+version '1.0'
 
+publishing {
+    repositories {
+        maven {
+            println("buildDir: " + "${buildDir}")
+            url = "$buildDir/repo"
+        }
+    }
+}
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.3.11'
+    println 'Insdide depenedencies'
+//    compile 'org.codehaus.groovy:groovy-all:2.3.11'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
+
 test {
     useJUnitPlatform()
+}
+
+//task is a method name name in a project object
+//Task task(String taskName) throws InvalidUserDataException;
+// task(printStuff) {....}
+ task printStuff {
+    println('executing from the custom task: printStuff')
+    def taskByName = project.tasks.getByName("printStuff")
+    taskByName.setGroup("ALC GROUP")
+    println("taskByName: " + taskByName)
+    String groupName = taskByName.getGroup()
+    println("task group_naee: " + groupName)
+}
+
+task anotherTask {
+    println("\nthis is another task - created differently")
+    tasks.getByName('anotherTask').setGroup("ALC GROUP")
+}
+
+/*class MyAWSPlugin implements Plugin<Project> {
+
+    @Override
+    void apply(Project project) {
+        def copyToS3Task = project.task('copyToS3') {
+            println("*** Copying artifacts to s3 bucket - alc-autobots-artifacts")
+        }
+
+        def deployToEC2Task = project.task("deployToEC2") {
+            println("*** Depoying to EC2 Instance...")
+        }
+    }
+}*/
+
+task someTask {
+    doLast {
+        println("Executing the single someTask ")
+    }
+}
+
+gradlePlugin {
+    plugins {
+        simplePlugin {
+            id = "com.mz.weatherforecast"
+            implementationClass = "com.test.plugin.WeatherForecastPlugin"
+        }
+    }
 }
